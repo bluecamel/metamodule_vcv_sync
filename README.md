@@ -3,7 +3,7 @@ This project keeps your VCV Library in sync with MetaModule plugins/modules.
 
 It scrapes the MetaModule site for all plugins and modules.  Then it logs into VCV Library and loads the plugins/modules from your library.  Any MetaModule modules/plugins that are not in your VCV Library are added.
 
-[!PLEASE BE KIND]
+[!CAUTION]
 Please note that both 4MS and VCV are being kind enough to let us use their sites and APIs to do this.  I have been very careful to limit the load on their sites.  For example, on VCV Library, there is one call to login (getting a token) and another call to get the modules/plugins currently in your library.  If all of the MetaModule plugins/modules are already in your library, nothing else will happen.  If some plugins/modules are not in your library, they will be added individually.
 
 If you encounter any issues, please don't run the script over and over.  It shouldn't cause much load on 4MS or VCV sites, but please be conscious to not keep trying if it's failing.  Instead, please run in [verbose mode](#verbose-mode) and create an issue with the output and I will do my best to help.
@@ -23,7 +23,7 @@ Provide your VCV Library username and password as arguments to [docker/run.py](d
 ./docker/run.py 'username@address.com' 'password'
 ```
 
-[!NOTE]
+[!IMPORTANT]
 In many shells, you could have issues with special characters, particularly for passwords.  Use single quotes around your password, as in the example above, and you should be okay.  Double quotes will usually cause problems and the VCV Library login will fail.
 
 ### Verbose mode
