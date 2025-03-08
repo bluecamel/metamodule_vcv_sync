@@ -19,12 +19,12 @@ class Process(subprocess.Popen):
 
         if not quiet:
             while self.poll() is None:
-                stdout = self.stdout.read(1)
+                stdout = self.stdout.read()
                 if stdout:
                     sys.stdout.write(stdout)
                     sys.stdout.flush()
 
-                stderr = self.stderr.read(1)
+                stderr = self.stderr.read()
                 if stderr:
                     sys.stderr.write(stderr)
                     sys.stderr.flush()
@@ -72,7 +72,8 @@ class DockerImage:
         metamodule_plugins_url: str,
         metamodule_modules_url: str,
         vcv_rack_libarary_token_url: str,
-        vcv_rack_library_modules_url: str
+        vcv_rack_library_modules_url: str,
+        verbose: bool
     ) -> (bool, Process):
         command = [
             'docker', 'run',
@@ -85,7 +86,8 @@ class DockerImage:
             metamodule_plugins_url,
             metamodule_modules_url,
             vcv_rack_libarary_token_url,
-            vcv_rack_library_modules_url
+            vcv_rack_library_modules_url,
+            str(verbose)
         ]
 
         process = Process(command=command)
@@ -126,6 +128,9 @@ class Runner:
         parser.add_argument('--vcv_rack_library_modules_url', type=str, action='store',
             default='https://api.vcvrack.com/modules', help='VCV Rack Library modules URL.')
 
+        parser.add_argument('-v', '--verbose', action='store_true',
+            help='Verbose output.')
+
         self.args = parser.parse_args()
 
     def run(self):
@@ -136,17 +141,28 @@ class Runner:
             context_dir=os.path.join(self.script_dir, '..'))
 
         if self.args.build or not self.docker_image.exists():
+            if self.args.verbose:
+                print('Building docker image.')
+
             success, _ = self.docker_image.build()
+
+            if self.args.verbose and success:
+                print('Docker image built.')
+
             if not success:
                 print('Docker build failed.')
                 sys.exit(1)
+
+        if self.args.verbose:
+            print('Running container.')
 
         success, _ = self.docker_image.run(container_name=self.args.container_name,
             vcv_email=self.args.vcv_email, vcv_password=self.args.vcv_password,
             metamodule_plugins_url=self.args.metamodule_plugins_url,
             metamodule_modules_url=self.args.metamodule_modules_url,
             vcv_rack_libarary_token_url=self.args.vcv_rack_libarary_token_url,
-            vcv_rack_library_modules_url=self.args.vcv_rack_library_modules_url)
+            vcv_rack_library_modules_url=self.args.vcv_rack_library_modules_url,
+            verbose=self.args.verbose)
 
         if not success:
             print('Docker run failed.')
